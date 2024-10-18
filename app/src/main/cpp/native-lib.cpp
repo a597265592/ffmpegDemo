@@ -97,6 +97,7 @@ void *decodeVideo(void *pvoid) {
         pts = pts * singleVideoTime;
         videoNowTime = pts;
         double delayTime = getDelayTime(audioNowTime - videoNowTime) * 1000000;
+        LOGI("延时的delayTime为%d",delayTime);
         av_usleep( delayTime);
         sws_scale(swsContext, (const uint8_t *const *) videoFrame->data, videoFrame->linesize, 0,
                   videoContext->height,
@@ -226,7 +227,7 @@ Java_com_example_ffmpegdemo_CJPlayer_play(JNIEnv *env, jobject thiz, jstring url
             avcodec_open2(videoContext, dec, 0);
             avCodecParameters->video_delay;
             AVRational avRational = avFormatContext->streams[i]->time_base;
-            singleVideoTime = avRational.num / (double) avRational.den;
+            singleVideoTime = (double)avRational.num / (double) avRational.den;
             int num = avFormatContext->streams[i]->avg_frame_rate.num;
             int den = avFormatContext->streams[i]->avg_frame_rate.den;
             double fps = num / (double)den;
@@ -270,7 +271,7 @@ Java_com_example_ffmpegdemo_CJPlayer_play(JNIEnv *env, jobject thiz, jstring url
     ANativeWindow_setBuffersGeometry(nativeWindow, width, height, WINDOW_FORMAT_RGBA_8888);
 
 
-    int numBytes = av_image_get_buffer_size(AV_PIX_FMT_BGRA, width, height, 1);
+    int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGBA, width, height, 1);
     outbuffer = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t));
 
     av_image_fill_arrays(rgbFrame->data, rgbFrame->linesize, outbuffer, AV_PIX_FMT_BGRA, width,
@@ -291,8 +292,14 @@ Java_com_example_ffmpegdemo_CJPlayer_play(JNIEnv *env, jobject thiz, jstring url
 
     //音频解码线程
     pthread_t thread_audio;
-    (&thread_audio, NULL, decodeAudio, NULL);
+    pthread_create(&thread_audio, NULL, decodeAudio, NULL);
 
     //释放
     env->ReleaseStringUTFChars(url_, url);
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_example_ffmpegdemo_CJPlayer_ffmpegInfo(JNIEnv *env, jobject thiz) {
+    // TODO: implement ffmpegInfo()
 }

@@ -8,7 +8,7 @@ import android.view.Surface;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
 
-public class CJPlayer {
+public class CJPlayer implements AudioTrack.OnPlaybackPositionUpdateListener {
     private SurfaceView surfaceView;
     private AudioTrack audioTrack;
 
@@ -47,6 +47,7 @@ public class CJPlayer {
                 AudioFormat.ENCODING_PCM_16BIT,
                 bufferSize,
                 AudioTrack.MODE_STREAM);
+        audioTrack.setPlaybackPositionUpdateListener(this);
         audioTrack.play();
     }
 
@@ -55,4 +56,13 @@ public class CJPlayer {
     }
 
 
+    @Override
+    public void onMarkerReached(AudioTrack track) {
+
+    }
+
+    @Override
+    public void onPeriodicNotification(AudioTrack track) {
+
+    }
 }
